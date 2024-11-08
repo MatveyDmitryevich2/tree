@@ -50,11 +50,9 @@ void Insert_func(Node* node)
 
 void Up_to_root(Node** node_ptr)
 {
-    fprintf(stderr, "вызов\n");
     while ((*node_ptr)->parent != NULL)
     {
         *node_ptr = (*node_ptr)->parent;
-        fprintf(stderr, "%p\n", (*node_ptr));
     }
 }
 
@@ -74,7 +72,7 @@ Node* Create_node_right(Node* parent_node)
     node->parent = parent_node;
 
     fprintf(stderr, "Напишите, пожалуйста, объект(с маленькой буквы) который Вы загадли\n");
-    
+
     int b = 0;
     size_t a = 0;
     while ((b = getchar()) != '\n' && b != EOF) { }
@@ -82,16 +80,6 @@ Node* Create_node_right(Node* parent_node)
     if(node->elem[size_line - 1] == '\n') { node->elem[size_line - 1] = '\0'; }
 
     return node;
-}
-
-
-void Print_tree(Node* node)
-{
-    if (!node) { return; }
-    fprintf(stderr, "(%s", node->elem);
-    if (node->left) { Print_tree(node->left); }
-    if (node->right) { Print_tree(node->right); }
-    fprintf(stderr, ")");
 }
 
 void Tree_dtor(Node* node)

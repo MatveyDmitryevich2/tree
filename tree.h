@@ -28,7 +28,6 @@ void Insert_func(Node* node);
 void Up_to_root(Node** node);
 Node* Create_node_left(char* old_answer, Node* old_node);
 Node* Create_node_right(Node* old_node);
-void Print_tree(Node* node);
 void Tree_dtor(Node* node);
 
 #endif //TREE_H

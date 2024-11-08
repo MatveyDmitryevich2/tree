@@ -2,10 +2,14 @@
 #include <assert.h>
 #include <stdint.h>
 
-#include "tree.h" 
+#include "tree.h"
+#include "dump_file.h"
 
 int main()
 {
+    Write_before_body();
+    Write_body();
+
     Node root = {};
     root.parent != NULL;
     char* first_question = (char*)calloc(1, 30);
@@ -14,7 +18,11 @@ int main()
 
     Insert_func(&root);
 
-    Print_tree(&root);
+
+    Dump(&root);
+    Write_body();
+    Write_html();
+
     Tree_dtor(&root);
 
     return 0;
