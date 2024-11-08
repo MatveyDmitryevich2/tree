@@ -29,5 +29,6 @@ void Up_to_root(Node** node);
 Node* Create_node_left(char* old_answer, Node* old_node);
 Node* Create_node_right(Node* old_node);
 void Tree_dtor(Node* node);
+void Create_new_node(Node* node);
 
 #endif //TREE_H

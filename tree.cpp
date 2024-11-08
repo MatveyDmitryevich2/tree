@@ -8,6 +8,7 @@
 
 #include "tree.h"
 
+
 void Insert_func(Node* node)
 {
     fprintf(stderr, "Загаданный вами объект %s?\n", node->elem);
@@ -29,15 +30,7 @@ void Insert_func(Node* node)
     {
         if (node->right == NULL) 
         {
-            node->right = Create_node_right(node);
-            node->left = Create_node_left(node->elem, node);
-            fprintf(stderr, "Напишите, пожалуйста, вопрос(с маленькой буквы),"
-            "по которму можно отличить %s и загаданный Вами объект\n", node->elem);
-            size_t a = 0;
-            long int size_line = getline(&node->elem, &a, stdin);
-            if(node->elem[size_line - 1] == '\n') { node->elem[size_line - 1] = '\0'; }
-            Up_to_root(&node);
-            Insert_func(node);
+            Create_new_node(node);
         }
         else { Insert_func(node->right); }
     }
@@ -46,6 +39,19 @@ void Insert_func(Node* node)
         Up_to_root(&node);
         return;
     }
+}
+
+void Create_new_node(Node* node)
+{
+    node->right = Create_node_right(node);
+    node->left = Create_node_left(node->elem, node);
+    fprintf(stderr, "Напишите, пожалуйста, вопрос(с маленькой буквы),"
+    "по которму можно отличить %s и загаданный Вами объект\n", node->elem);
+    size_t a = 0;
+    long int size_line = getline(&node->elem, &a, stdin);
+    if(node->elem[size_line - 1] == '\n') { node->elem[size_line - 1] = '\0'; }
+    Up_to_root(&node);
+    Insert_func(node);
 }
 
 void Up_to_root(Node** node_ptr)

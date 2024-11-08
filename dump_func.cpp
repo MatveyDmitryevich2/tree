@@ -12,24 +12,37 @@ int node_count = 0;
 
 void Generate_nodes(Node* node, FILE* file)
 {
-    if (node == NULL) {
-        return;
-    }
+    if (node == NULL) { return; }
 
     char node_id[100];
     snprintf(node_id, sizeof(node_id), "node_%d", node_count++);
 
-    fprintf(file, "    %s [style=filled, fillcolor=lightyellow, label=\"%s\"];\n", node_id, node->elem);
+    fprintf(file, "%s [\n", node_id);
+    fprintf(file, "shape=plaintext,\n");
+    fprintf(file, "label=<\n");
+    fprintf(file, "<table border=\"0\" cellpadding=\"4\" cellborder=\"1\" width=\"300\">\n");
+    fprintf(file, "<tr><td align=\"center\" colspan=\"2\">Parent: %p</td></tr>\n", (void*)node->parent);
+    fprintf(file, "<tr><td align=\"center\" colspan=\"2\">%s</td></tr>\n", node->elem);
+    fprintf(file, "<tr>\n");
+    fprintf(file, "<td align=\"center\" width=\"150\">Left: %p</td>\n", (void*)node->left);
+    fprintf(file, "<td align=\"center\" width=\"150\">Right: %p</td>\n", (void*)node->right);
+    fprintf(file, "</tr>\n");
+    fprintf(file, "</table>\n");
+    fprintf(file, ">\n");
+    fprintf(file, "];\n");
 
-    if (node->left != NULL || node->right != NULL) {
-        if (node->left != NULL) {
+    if (node->left != NULL || node->right != NULL)
+    {
+        if (node->left != NULL)
+        {
             char left_id[100];
             snprintf(left_id, sizeof(left_id), "node_%d", node_count);
             fprintf(file, "    %s -> %s [color=\"#A600A6\", label=\"да\"];\n", node_id, left_id);
             Generate_nodes(node->left, file);
         }
 
-        if (node->right != NULL) {
+        if (node->right != NULL)
+        {
             char right_id[100];
             snprintf(right_id, sizeof(right_id), "node_%d", node_count);
             fprintf(file, "    %s -> %s [color=\"#A600A6\", label=\"нет\"];\n", node_id, right_id);
@@ -51,18 +64,7 @@ void Dump(Node* root)
     FILE* file_html = fopen("dump.html", "a+");
     FILE* file_dump = fopen(filename, "a+");
 
-    fprintf(file_dump, "digraph structs {\n");
-    fprintf(file_dump, "    charset = \"UTF-8\";\n");
-    fprintf(file_dump, "    rankdir=TB;\n");
-    fprintf(file_dump, "    bgcolor = \"#BFBA30\";\n");
-    fprintf(file_dump, "    fontcolor = black;\n");
-    fprintf(file_dump, "    fontsize = 18;\n");
-    fprintf(file_dump, "    style = \"rounded\";\n");
-    fprintf(file_dump, "    margin = 0.3;\n");
-    fprintf(file_dump, "    splines = ortho;\n");
-    fprintf(file_dump, "    ranksep = 1.0;\n");
-    fprintf(file_dump, "    nodesep = 0.9;\n");
-    fprintf(file_dump, "    edge [color=\"#A600A6\", style=solid, penwidth=2];\n");
+    fprintf(file_dump, INFO_GRAPH);
 
     Generate_nodes(root, file_dump);
 
@@ -84,9 +86,7 @@ void Dump(Node* root)
 void Write_before_body()
 {
     FILE* html_file = fopen("dump.html", "a+");
-    fprintf(html_file, "<!DOCTYPE html>\n<html lang=\"en\">\n\n<head>\n<meta charset=\"utf-8\">\n"
-                       "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
-                       "<title>list dump</title>\n<link rel=\"stylesheet\" href=\"styles.css\">\n</head>\n\n");
+    fprintf(html_file, INFO_HTML);
     fclose(html_file);
 }
 
