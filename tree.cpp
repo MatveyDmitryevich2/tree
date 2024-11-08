@@ -8,26 +8,78 @@
 
 #include "tree.h"
 
-void Insert_func(Node* node, tree_tipe argument)
+void Insert_func(Node* node)
 {
-    if (argument < node->elem)
+    fprintf(stderr, "Загаданный вами объект %s?\n", node->elem);
+
+    char answer[8] = "";
+    scanf("%s", answer);
+
+    if (strcmp(answer, YES) == 0)
     {
-        if (node->left == NULL) { node->left = Create_node(argument); }
-        else { Insert_func(node->left, argument); }
+        if (node->left == NULL)
+        {
+            fprintf(stderr, "Славно\n\n\n");
+            Up_to_root(&node);
+            Insert_func(node);
+        }
+        else { Insert_func(node->left); }
+    }
+    else if (strcmp(answer, NO) == 0)
+    {
+        if (node->right == NULL) 
+        {
+            node->right = Create_node_right(node);
+            node->left = Create_node_left(node->elem, node);
+            fprintf(stderr, "Напишите, пожалуйста, вопрос(с маленькой буквы),"
+            "по которму можно отличить %s и загаданный Вами объект\n", node->elem);
+            size_t a = 0;
+            long int size_line = getline(&node->elem, &a, stdin);
+            if(node->elem[size_line - 1] == '\n') { node->elem[size_line - 1] = '\0'; }
+            Up_to_root(&node);
+            Insert_func(node);
+        }
+        else { Insert_func(node->right); }
     }
     else
     {
-        if (node->right == NULL) { node->right = Create_node(argument); }
-        else { Insert_func(node->right, argument); }
+        Up_to_root(&node);
+        return;
     }
 }
 
-Node* Create_node(tree_tipe argument)
+void Up_to_root(Node** node_ptr)
+{
+    fprintf(stderr, "вызов\n");
+    while ((*node_ptr)->parent != NULL)
+    {
+        *node_ptr = (*node_ptr)->parent;
+        fprintf(stderr, "%p\n", (*node_ptr));
+    }
+}
+
+Node* Create_node_left(char* old_answer, Node* parent_node)
 {
     Node* node = (Node*)calloc(1, sizeof(Node));
-    assert(node != NULL);
+    node->parent = parent_node;
 
-    node->elem = argument;
+    node->elem = old_answer;
+
+    return node;
+}
+
+Node* Create_node_right(Node* parent_node)
+{
+    Node* node = (Node*)calloc(1, sizeof(Node));
+    node->parent = parent_node;
+
+    fprintf(stderr, "Напишите, пожалуйста, объект(с маленькой буквы) который Вы загадли\n");
+    
+    int b = 0;
+    size_t a = 0;
+    while ((b = getchar()) != '\n' && b != EOF) { }
+    long int size_line = getline(&node->elem, &a, stdin);
+    if(node->elem[size_line - 1] == '\n') { node->elem[size_line - 1] = '\0'; }
 
     return node;
 }
@@ -36,21 +88,11 @@ Node* Create_node(tree_tipe argument)
 void Print_tree(Node* node)
 {
     if (!node) { return; }
-    fprintf(stderr, "(%ld", node->elem);
+    fprintf(stderr, "(%s", node->elem);
     if (node->left) { Print_tree(node->left); }
     if (node->right) { Print_tree(node->right); }
     fprintf(stderr, ")");
 }
-
-// void Tree_dtor(Node* node)
-// {
-//     if (!node) { return; }
-//     free(node->left);
-//     node->left = NULL;
-//     free(node->right);
-//     node->right = NULL;
-//     if (node) { Tree_dtor(node); }
-// }
 
 void Tree_dtor(Node* node)
 {
@@ -60,6 +102,9 @@ void Tree_dtor(Node* node)
     if (node->right) { Tree_dtor(node->right); }
 
     free(node->left);
+    node->left = NULL;
+
+    free(node->elem);
     node->left = NULL;
 
     free(node->right);

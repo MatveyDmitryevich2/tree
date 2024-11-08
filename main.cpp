@@ -7,14 +7,12 @@
 int main()
 {
     Node root = {};
-    root.elem = 50;
+    root.parent != NULL;
+    char* first_question = (char*)calloc(1, 30);
+    strcpy(first_question, "полторашка");
+    root.elem = first_question;
 
-    Insert_func(&root, 30);
-    Insert_func(&root, 70);
-    Insert_func(&root, 10);
-    Insert_func(&root, 65);
-    Insert_func(&root, 80);
-    Insert_func(&root, 66);
+    Insert_func(&root);
 
     Print_tree(&root);
     Tree_dtor(&root);

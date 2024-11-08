@@ -11,17 +11,23 @@
 
 #include "tree.h" 
 
-typedef int64_t tree_tipe;
+typedef char* tree_type;
+
+const char YES[] = "да";
+const char NO[] = "нет";
 
 struct Node
 {
-    tree_tipe elem;
+    char* elem;
     Node* left;
     Node* right;
+    Node* parent;
 };
 
-void Insert_func(Node* node, tree_tipe argument);
-Node* Create_node(tree_tipe argument);
+void Insert_func(Node* node);
+void Up_to_root(Node** node);
+Node* Create_node_left(char* old_answer, Node* old_node);
+Node* Create_node_right(Node* old_node);
 void Print_tree(Node* node);
 void Tree_dtor(Node* node);
 
