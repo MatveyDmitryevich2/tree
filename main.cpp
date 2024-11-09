@@ -8,22 +8,24 @@
 int main()
 {
     Write_before_body();
-    Write_body();
+    Write_body();//нужно либо запись испрвить либо чтение
 
-    Node root = {};
-    root.parent != NULL;
-    char* first_question = (char*)calloc(1, 30);
-    strcpy(first_question, "полторашка");
-    root.elem = first_question;
+    Node* root = Decoding_tree();
+    if (root == NULL)
+    {
+        root = (Node*)calloc(1, sizeof(Node));
+        char* first_question = (char*)calloc(1, 30);
+        strcpy(first_question, "полторашка");
+        root->elem = first_question;
+    }
+    Insert(root);
 
-    Insert_func(&root);
-
-
-    Dump(&root);
+    Dump(root);
     Write_body();
     Write_html();
 
-    Tree_dtor(&root);
+    Saving_tree(root);
 
+    Tree_dtor(root);
     return 0;
 }
