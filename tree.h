@@ -22,8 +22,9 @@ const size_t MAX_TREE_DEPTH = 50;
 
 enum To_build_definitions_elem
 {
-    LEFT_NO = 0,
-    RIGHT_YES = 1,
+    LEFT_YES = 1,
+    RIGHT_NO = 0,
+    PARENT = -1,
 };
 
 enum IS_FOUND
@@ -38,12 +39,6 @@ struct Node
     Node* left;
     Node* right;
     Node* parent;
-};
-
-struct Info_about_unit_of_path
-{
-    Node* Path_to_elem;
-    Node* True_or_False;
 };
 
 void Insert(Node* node);
@@ -64,7 +59,8 @@ Node* New_node(char* argument, Node* parent);
 void Skip_parenthesis(char** buffer);
 
 void Make_definition_elem(Node* node, char* elem);
-IS_FOUND Recursive_search_path_to_elem(Node* node, char* elem, Stack_t* Path_to_elem);
+IS_FOUND Recursive_search_path_to_elem(Node* node, char* elem, Stack_t* Path_to_elem, bool Left_or_right);
+// void Definition_output(size_t array_size, Info_about_unit_of_path* array_properties);
 
 
 #endif //TREE_H

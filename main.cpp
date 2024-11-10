@@ -24,7 +24,7 @@ int main()
     Write_body();
     Write_html();
 
-    Make_definition_elem(root, "дырка");
+    Make_definition_elem(root, "уретра");
 
     Saving_tree(root);
     Tree_dtor(root);

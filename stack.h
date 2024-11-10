@@ -8,7 +8,13 @@
 #include <assert.h>
 #include <stdint.h>
 
-typedef char* StackElem_t;
+struct Info_about_unit_of_path
+{
+    char* Adress;
+    bool True_or_False;
+};
+
+typedef Info_about_unit_of_path StackElem_t;
 static const int SHAG_V_REALOC = 2;
 static const int OBRATNIY_SHAG_V_REALOC = 4;
 static const uint64_t KONOREYKA = 29304148;
@@ -48,6 +54,6 @@ enum Oshibki_Stacka StackRecalloc(Stack_t* stk);
 enum Oshibki_Stacka StackPop(Stack_t* stk, StackElem_t* last_recorded_value);
 int StackDtor(Stack_t* stk);
 enum Oshibki_Stacka StackError(Stack_t* stk);
-enum Oshibki_Stacka StackDump(Stack_t* stk);
+// enum Oshibki_Stacka StackDump(Stack_t* stk);
 
 #endif // STACK_H

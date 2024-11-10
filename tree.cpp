@@ -238,45 +238,67 @@ void Make_definition_elem(Node* node, char* elem)
     Stack_t Path_to_elem = {};
     StackConstrtor(&Path_to_elem, MAX_TREE_DEPTH);
 
-    Recursive_search_path_to_elem(node, elem, &Path_to_elem);
+    Recursive_search_path_to_elem(node, elem, &Path_to_elem, PARENT);
 
-    fprintf(stderr, "\n\n\n\n");
-    for (long long i = (long long)Path_to_elem.vacant_place - 1; i >= 0; i--)
+    for (long long i = 0; i <= (long long)Path_to_elem.vacant_place - 1; i++)
     {
         fprintf(stderr, "   [%lld] = ", i);
-        fprintf(stderr, "%p\n", Path_to_elem.array_data[i]);
+        fprintf(stderr, "%p", Path_to_elem.array_data[i].Adress);
+        if (Path_to_elem.array_data[i].True_or_False == LEFT_YES) { fprintf(stderr, "    YES\n"); }
+        else { fprintf(stderr, "    NO\n"); }
     }
 
+    Definition_output(Path_to_elem.vacant_place - 1, Path_to_elem.array_data);
+    
     StackDtor(&Path_to_elem);
 }
 
-IS_FOUND Recursive_search_path_to_elem(Node* node, char* elem, Stack_t* Path_to_elem)
+IS_FOUND Recursive_search_path_to_elem(Node* node, char* elem, Stack_t* Path_to_elem, bool Left_or_right)
 {
-    StackPush(Path_to_elem, (StackElem_t)node);
-    fprintf(stderr, "push = %p\n", node);
-
+    Info_about_unit_of_path node_info = {(char*)node, Left_or_right};
+    StackPush(Path_to_elem, (StackElem_t)node_info);
 
     if ((!node->left) && (!node->right))
     {
-        if   (strcmp(elem, node->elem) == 0)                       { fprintf(stderr, "YEAH!!\n"); return FOUND; }
-        else {StackElem_t trash = 0; StackPop(Path_to_elem, &trash); fprintf(stderr, "pop = %p\n", trash); return NOT_FOUND; } 
+        if   (strcmp(elem, node->elem) == 0)                        { return FOUND; }
+        else {StackElem_t trash = {}; StackPop(Path_to_elem, &trash); return NOT_FOUND; } 
     }
 
-    IS_FOUND is_found_left  = Recursive_search_path_to_elem(node->left, elem, Path_to_elem);
-    IS_FOUND is_found_right = Recursive_search_path_to_elem(node->right, elem, Path_to_elem);
+    IS_FOUND is_found_left  = Recursive_search_path_to_elem(node->left, elem, Path_to_elem, LEFT_YES);
+    IS_FOUND is_found_right = Recursive_search_path_to_elem(node->right, elem, Path_to_elem, RIGHT_NO);
 
-    if ((is_found_left == FOUND) || (is_found_right == FOUND))
-    {
-        return FOUND;
-    }
+    if ((is_found_left == FOUND) || (is_found_right == FOUND)) { return FOUND; }
 
-    StackElem_t trash = 0; StackPop(Path_to_elem, &trash);
-    fprintf(stderr, "pop* = %p\n", trash);
+    StackElem_t trash = {}; StackPop(Path_to_elem, &trash);
 
     return NOT_FOUND;
 }
 
+void Definition_output(size_t array_size, Info_about_unit_of_path* array_properties)
+{
+    fprintf(stderr, "\n%s:", ((Node*)array_properties[array_size].Adress)->elem);
+    for(size_t i = 1; i <= array_size; i++)
+    {
+        if (array_properties[i].True_or_False == LEFT_YES)
+        {
+            fprintf(stderr, " ");
+        }
+        else
+        {
+            fprintf(stderr, " не ");
+        }
+        fprintf(stderr, "%s", ((Node*)array_properties[i - 1].Adress)->elem);
+    }
+    fprintf(stderr, "\n");
+}
 
+// void Comparison_elem_definitions(Node* node, char* elem1, char* elem2)
+// {
+//     Make_definition_elem(node, elem1);
+//     Make_definition_elem(node, elem2);
+
+//     //Info_about_unit_of_path* array_properties_1 = (Info_about_unit_of_path*)calloc(Path_to_elem.vacant_place, sizeof(Info_about_unit_of_path));
+// }
 
 
 
