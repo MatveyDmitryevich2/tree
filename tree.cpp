@@ -1,50 +1,174 @@
+#include "tree.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
-#include <stdint.h>
 #include <stdbool.h>
 
-#include "tree.h"
 #include "dump_file.h"
 #include "stack.h"
 
-void Insert(Node* node)
+enum User_response
 {
-    assert(node != NULL);
+    User_response_YES   = 1,
+    User_response_NO    = 0,
+    User_response_EXIT  = 2,
+    User_response_ERROR = 3,
+};
 
-    fprintf(stderr, "Загаданный вами объект %s?\n", node->elem);
+static void Mode_insert(Node* node);
+static void Up_to_root(Node** node);
+static void Insert_new_property(Node* node);
+static Node* Create_node(Node* parent_node);
+static Node* Create_left_сhild(char* old_answer, Node* parent_node);
+static Node* Insert_right_child(Node* old_node);
+static char* Getting_info_from_user(Node* node);
+static void Recursive_tree_entry(Node* node, FILE* file_stor);
+static size_t Reads_file_size(FILE* file);
+static Node* Decod_tree();
+static void Parsing_line(char** buffer, char* line_buffer);
+static Node* Parsing_tree(char** buffer, Node* parent);
+static Node* New_node(char* argument, Node* parent);
+static void Skip_parenthesis(char** buffer);
+static void Selecting_an_element(char** elem_v);
+static Game_modes User_interaction();
+static void Make_definition_elem(Node* node, char* elem, Stack_t* Path_to_elem);
+static Is_found Recursive_search_path_to_elem(Node* node, char* elem, Stack_t* Path_to_elem, bool Left_or_right);
+static void Definition_output(size_t array_size, Info_about_unit_of_path* array_properties);
+static bool Is_node_object(Node* node);
+static User_response Analyzing_user_response(char response[SIZE_ANSWER]);
 
-    char answer[SIZE_ANSWER] = "";
-    scanf("%s", answer);
+//-------------------------------------------------global---------------------------------------------------------------
 
-    if (strcmp(answer, YES) == 0)
+Node* Made_root(Node* root)
+{
+    root = Decod_tree();
+
+    if (root == NULL)
     {
-        if (node->left == NULL)
-        {
-            fprintf(stderr, "Славно\n\n\n");
-            Up_to_root(&node);
-            Insert(node); 
-        }
-        else { Insert(node->left); }
+        root = (Node*)calloc(1, sizeof(Node));
+        char* first_question = (char*)calloc(1, 30);
+        strcpy(first_question, "1.5шка");
+        root->elem = first_question;
     }
-    else if (strcmp(answer, NO) == 0)
+
+    return root;
+}
+
+void Game_mode_selection(Node* node)
+{
+    switch(User_interaction())
     {
-        if (node->right == NULL) 
+        case Game_modes_ELEM_SEARCH: 
         {
-            Insert_new_property(node);
-        }
-        else { Insert(node->right); }
-    }
-    else
-    {
-        Up_to_root(&node);
-        return;
+            Mode_insert(node);
+        }  break;
+        case Game_modes_MAKE_DEFENITION_ELEM: 
+        {
+            Stack_t Path_to_elem = {};
+            StackConstrtor(&Path_to_elem, MAX_TREE_DEPTH);
+
+            char* elem = NULL;
+            Selecting_an_element(&elem);
+
+            Make_definition_elem(node, elem, &Path_to_elem);
+            Definition_output(Path_to_elem.vacant_place - 1, Path_to_elem.array_data);
+
+            free(elem);
+            StackDtor(&Path_to_elem);
+        }  break;
+        case Game_modes_FIND_COMMONALITIES_BETWEEN_ELEM: 
+        {
+            //FIXME сделать функцию
+        }  break;
+        case Game_modes_EXIT:
+        {} break;
+        default:
+        { assert(0); } 
+           break;
     }
 }
 
-void Insert_new_property(Node* node)
+void Saving_tree(Node* node)
+{
+    assert(node != NULL);
+
+    FILE* file_for_storing_tree = fopen(NAME_FILE_STOR, "r+");
+    Recursive_tree_entry(node, file_for_storing_tree);
+    fclose(file_for_storing_tree);
+}
+
+void Tree_dtor(Node* node)
+{
+    if (!node) { return; }
+
+    if (node->left) { Tree_dtor(node->left); }
+    if (node->right) { Tree_dtor(node->right); }
+
+    free(node->elem);
+    free(node);
+}
+
+//-----------------------------------------------------static-----------------------------------------------------------
+
+static void Mode_insert(Node* node)
+{
+    assert(node != NULL);
+
+    // NOTE
+    fprintf(stderr, "Загаданный вами объект %s?\n", node->elem);
+
+    // NOTE
+    char answer[SIZE_ANSWER] = "";
+    assert(SIZE_ANSWER == 13 /*поменять scanf %12s если упало*/);
+    scanf("%12s", answer);
+
+    switch (Analyzing_user_response(answer))
+    {
+        case User_response_YES:
+        {
+            if (Is_node_object(node))
+            {
+                fprintf(stderr, "Славно\n\n\n");
+                Up_to_root(&node);
+                Mode_insert(node);
+            }
+            else { Mode_insert(node->left); }
+        } break;
+        case User_response_NO:
+        {
+            if (Is_node_object(node)) { Insert_new_property(node); Mode_insert(node);}
+            else                      { Mode_insert(node->right); }
+        } break;
+        case User_response_EXIT:
+        {
+            Up_to_root(&node);
+        } break;
+        default:
+        {
+            assert(0);
+        } break;
+    }
+}
+
+static User_response Analyzing_user_response(char response[SIZE_ANSWER])
+{
+    assert(response != NULL);
+
+    if (strcmp(response, YES) == 0)       { return User_response_YES;   }
+    else if (strcmp(response, NO) == 0)   { return User_response_NO;    }
+    else if (strcmp(response, EXIT) == 0) { return User_response_EXIT;  }
+    else                                  { return User_response_ERROR; }
+}
+
+static bool Is_node_object(Node* node)
+{
+    return node->left == NULL && node->right == NULL;
+}
+
+static void Insert_new_property(Node* node)
 {
     assert(node != NULL);
 
@@ -57,10 +181,9 @@ void Insert_new_property(Node* node)
     node->elem = Getting_info_from_user(node);
 
     Up_to_root(&node);
-    Insert(node);
 }
 
-Node* Create_node(Node* parent_node)
+static Node* Create_node(Node* parent_node)
 {
     assert(parent_node != NULL);
 
@@ -70,7 +193,7 @@ Node* Create_node(Node* parent_node)
     return node;
 }
 
-Node* Create_left_сhild(char* old_answer, Node* parent_node)
+static Node* Create_left_сhild(char* old_answer, Node* parent_node)
 {
     assert(old_answer != NULL);
     assert(parent_node != NULL);
@@ -82,7 +205,7 @@ Node* Create_left_сhild(char* old_answer, Node* parent_node)
     return node;
 }
 
-Node* Insert_right_child(Node* parent_node)
+static Node* Insert_right_child(Node* parent_node)
 {
     assert(parent_node != NULL);
 
@@ -97,7 +220,7 @@ Node* Insert_right_child(Node* parent_node)
     return node;
 }
 
-char* Getting_info_from_user(Node* node)
+static char* Getting_info_from_user(Node* node)
 {
     size_t size_new_condition = 0;
     long int size_line = getline(&node->elem, &size_new_condition, stdin);
@@ -107,7 +230,7 @@ char* Getting_info_from_user(Node* node)
     return node->elem;
 }
 
-void Up_to_root(Node** node_ptr)
+static void Up_to_root(Node** node_ptr)
 {
     assert(node_ptr != NULL);
 
@@ -117,18 +240,7 @@ void Up_to_root(Node** node_ptr)
     }
 }
 
-void Tree_dtor(Node* node)
-{
-    if (!node) { return; }
-
-    if (node->left) { Tree_dtor(node->left); }
-    if (node->right) { Tree_dtor(node->right); }
-
-    free(node->elem);
-    free(node);
-}
-
-void Recursive_tree_entry(Node* node, FILE* file_stor)
+static void Recursive_tree_entry(Node* node, FILE* file_stor)
 {
     if (!node) { return; }
 
@@ -140,16 +252,7 @@ void Recursive_tree_entry(Node* node, FILE* file_stor)
     fprintf(file_stor, "}");
 }
 
-void Saving_tree(Node* node)
-{
-    assert(node != NULL);
-
-    FILE* file_for_storing_tree = fopen(NAME_FILE_STOR, "r+");
-    Recursive_tree_entry(node, file_for_storing_tree);
-    fclose(file_for_storing_tree);
-}
-
-size_t Reads_file_size(FILE *file)
+static size_t Reads_file_size(FILE *file)
 {
     assert(file != NULL);
 
@@ -160,7 +263,7 @@ size_t Reads_file_size(FILE *file)
     return size_file;
 }
 
-Node* Decoding_tree()
+static Node* Decod_tree()
 {
     FILE* file_for_storing_tree = fopen(NAME_FILE_STOR, "r");
 
@@ -179,7 +282,7 @@ Node* Decoding_tree()
     return root;
 }
 
-Node* New_node(char* argument, Node* parent)
+static Node* New_node(char* argument, Node* parent)
 {
     Node* node = (Node*)calloc(1, sizeof(Node));
     node->elem = strdup(argument);
@@ -188,7 +291,7 @@ Node* New_node(char* argument, Node* parent)
     return node;
 }
 
-Node* Parsing_tree(char** buffer, Node* parent)
+static Node* Parsing_tree(char** buffer, Node* parent)
 {
     if (**buffer == '\0') { return NULL; }
 
@@ -213,12 +316,12 @@ Node* Parsing_tree(char** buffer, Node* parent)
     return node;
 }
 
-void Skip_parenthesis(char** buffer)
+static void Skip_parenthesis(char** buffer)
 {
     (*buffer)++;
 }
 
-void Parsing_line(char** buffer, char* line_buffer)
+static void Parsing_line(char** buffer, char* line_buffer)
 {
     char* start = *buffer;
     char* end = *buffer;
@@ -233,27 +336,35 @@ void Parsing_line(char** buffer, char* line_buffer)
 }
 //---------------------------------------------finding definitions------------------------------------------------------
 
-void Make_definition_elem(Node* node, char* elem)
+static Game_modes User_interaction()
 {
-    Stack_t Path_to_elem = {};
-    StackConstrtor(&Path_to_elem, MAX_TREE_DEPTH);
+    fprintf(stderr, "Выберите режим игры:\n1)Найти или добавить элемент\n2)Создать определение\n"
+                    "3)Поиск общего между двумя элементамиn\n4)Выход\n\nНапишите цифру от 1 до 4\n");
 
-    Recursive_search_path_to_elem(node, elem, &Path_to_elem, PARENT);
+    Game_modes game_mode = (Game_modes)0;
+    scanf("%d", &game_mode);
 
-    for (long long i = 0; i <= (long long)Path_to_elem.vacant_place - 1; i++)
-    {
-        fprintf(stderr, "   [%lld] = ", i);
-        fprintf(stderr, "%p", Path_to_elem.array_data[i].Adress);
-        if (Path_to_elem.array_data[i].True_or_False == LEFT_YES) { fprintf(stderr, "    YES\n"); }
-        else { fprintf(stderr, "    NO\n"); }
-    }
-
-    Definition_output(Path_to_elem.vacant_place - 1, Path_to_elem.array_data);
-    
-    StackDtor(&Path_to_elem);
+    return game_mode;
 }
 
-IS_FOUND Recursive_search_path_to_elem(Node* node, char* elem, Stack_t* Path_to_elem, bool Left_or_right)
+static void Selecting_an_element(char** elem)
+{
+    fprintf(stderr, "Введите желаем для работы элемент\n");
+    int clean_buffer = 0;
+    while ((clean_buffer = getchar()) != '\n' && clean_buffer != EOF) { }
+    size_t size_new_condition = 0;
+    long int size_line = getline(elem, &size_new_condition, stdin);
+
+    if((*elem)[size_line - 1] == '\n') { (*elem)[size_line - 1] = '\0'; }
+
+}
+
+static void `Make_definition_elem(Node* node, char* elem, Stack_t* Path_to_elem)
+{
+    Recursive_search_path_to_elem(node, elem, Path_to_elem, PARENT);
+}
+
+static Is_found Recursive_search_path_to_elem(Node* node, char* elem, Stack_t* Path_to_elem, bool Left_or_right)
 {
     Info_about_unit_of_path node_info = {(char*)node, Left_or_right};
     StackPush(Path_to_elem, (StackElem_t)node_info);
@@ -264,17 +375,17 @@ IS_FOUND Recursive_search_path_to_elem(Node* node, char* elem, Stack_t* Path_to_
         else {StackElem_t trash = {}; StackPop(Path_to_elem, &trash); return NOT_FOUND; } 
     }
 
-    IS_FOUND is_found_left  = Recursive_search_path_to_elem(node->left, elem, Path_to_elem, LEFT_YES);
-    IS_FOUND is_found_right = Recursive_search_path_to_elem(node->right, elem, Path_to_elem, RIGHT_NO);
+    Is_found Is_found_left  = Recursive_search_path_to_elem(node->left, elem, Path_to_elem, LEFT_YES);
+    Is_found Is_found_right = Recursive_search_path_to_elem(node->right, elem, Path_to_elem, RIGHT_NO);
 
-    if ((is_found_left == FOUND) || (is_found_right == FOUND)) { return FOUND; }
+    if ((Is_found_left == FOUND) || (Is_found_right == FOUND)) { return FOUND; }
 
     StackElem_t trash = {}; StackPop(Path_to_elem, &trash);
 
     return NOT_FOUND;
 }
 
-void Definition_output(size_t array_size, Info_about_unit_of_path* array_properties)
+static void Definition_output(size_t array_size, Info_about_unit_of_path* array_properties)
 {
     fprintf(stderr, "\n%s:", ((Node*)array_properties[array_size].Adress)->elem);
     for(size_t i = 1; i <= array_size; i++)
@@ -292,13 +403,14 @@ void Definition_output(size_t array_size, Info_about_unit_of_path* array_propert
     fprintf(stderr, "\n");
 }
 
-// void Comparison_elem_definitions(Node* node, char* elem1, char* elem2)
-// {
-//     Make_definition_elem(node, elem1);
-//     Make_definition_elem(node, elem2);
 
-//     //Info_about_unit_of_path* array_properties_1 = (Info_about_unit_of_path*)calloc(Path_to_elem.vacant_place, sizeof(Info_about_unit_of_path));
-// }
+    // for (long long i = 0; i <= (long long)Path_to_elem.vacant_place - 1; i++)
+    // {
+    //     fprintf(stderr, "   [%lld] = ", i);
+    //     fprintf(stderr, "%p", Path_to_elem.array_data[i].Adress);
+    //     if (Path_to_elem.array_data[i].True_or_False == LEFT_YES) { fprintf(stderr, "    YES\n"); }
+    //     else { fprintf(stderr, "    NO\n"); }
+    // }
 
 
 

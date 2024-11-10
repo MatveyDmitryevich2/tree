@@ -1,3 +1,5 @@
+#include "dump_file.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
@@ -6,11 +8,55 @@
 #include <iostream>
 #include <unistd.h>
 
-#include "dump_file.h"
+
+static void Write_before_body();
+static void Write_body();
+static void Write_html();
+static void Generate_nodes(Node* node, FILE* file);
+
+//--------------------------------------------------global--------------------------------------------------------------
+
+void Write_html_mode(Dump_html mode)
+{
+    if ( mode = Dump_html_BEGIN) { Write_before_body(); Write_body(); }
+    if ( mode = Dump_html_END)   { Write_body(); Write_html();        }
+}
+
+void Dump(Node* root) 
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+
+    long seconds = tv.tv_sec;
+    long microseconds = tv.tv_usec;
+    
+    char filename[100] = {0};
+    snprintf(filename, sizeof(filename), "file_%ld_%06ld.dot", seconds, microseconds);
+    FILE* file_html = fopen("dump.html", "a+");
+    FILE* file_dump = fopen(filename, "a+");
+
+    fprintf(file_dump, INFO_GRAPH);
+
+    Generate_nodes(root, file_dump);
+
+    fprintf(file_dump, "}\n");
+
+    fclose(file_dump);
+
+    char command[256];
+    snprintf(command, sizeof(command), "dot -Tpng %s -o %.22s.png", filename, filename);
+    system(command);
+
+    snprintf(filename, sizeof(filename), "file_%ld_%06ld.png", seconds, microseconds);
+    fprintf(file_html, "<img src=\"%s\"/>\n", filename);
+    fclose(file_html);
+}
+
+//--------------------------------------------------static--------------------------------------------------------------
 
 int node_count = 0;
 
-void Generate_nodes(Node* node, FILE* file)
+static void Generate_nodes(Node* node, FILE* file)
 {
     if (node == NULL) { return; }
 
@@ -51,46 +97,14 @@ void Generate_nodes(Node* node, FILE* file)
     }
 }
 
-void Dump(Node* root) 
-{
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-
-    long seconds = tv.tv_sec;
-    long microseconds = tv.tv_usec;
-    
-    char filename[100] = {0};
-    snprintf(filename, sizeof(filename), "file_%ld_%06ld.dot", seconds, microseconds);
-    FILE* file_html = fopen("dump.html", "a+");
-    FILE* file_dump = fopen(filename, "a+");
-
-    fprintf(file_dump, INFO_GRAPH);
-
-    Generate_nodes(root, file_dump);
-
-    fprintf(file_dump, "}\n");
-
-    fclose(file_dump);
-
-    char command[256];
-    snprintf(command, sizeof(command), "dot -Tpng %s -o %.22s.png", filename, filename);
-    system(command);
-
-    snprintf(filename, sizeof(filename), "file_%ld_%06ld.png", seconds, microseconds);
-    fprintf(file_html, "<img src=\"%s\"/>\n", filename);
-    fclose(file_html);
-}
-
-
-
-void Write_before_body()
+static void Write_before_body()
 {
     FILE* html_file = fopen("dump.html", "a+");
     fprintf(html_file, INFO_HTML);
     fclose(html_file);
 }
 
-void Write_body()
+static void Write_body()
 {
     FILE* html_file = fopen("dump.html", "a+");
     fprintf(html_file, "<body>\n");
@@ -98,7 +112,7 @@ void Write_body()
     fclose(html_file);
 }
 
-void Write_html()
+static void Write_html()
 {
     FILE* html_file = fopen("dump.html", "a+");
     fprintf(html_file, "</html>\n");

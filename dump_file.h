@@ -5,6 +5,11 @@
 
 #include "tree.h"
 
+enum Dump_html
+{
+    Dump_html_BEGIN = 0,
+    Dump_html_END   = 1,
+};
 
 const char INFO_GRAPH[] = "digraph structs {\n charset = \"UTF-8\";\n rankdir=TB;\n bgcolor = \"#BFBA30\";\n"
                           "fontcolor = black;\n fontsize = 18;\n style = \"rounded\";\n margin = 0.3;\n splines = ortho"
@@ -15,9 +20,6 @@ const char INFO_HTML[] = "<!DOCTYPE html>\n<html lang=\"en\">\n\n<head>\n<meta c
 
 
 void Dump(Node* root);
-void Write_before_body();
-void Write_body();
-void Write_html();
-void Generate_nodes(Node* node, FILE* file);
+void Write_html_mode(Dump_html mode);
 
 #endif //DUMP_FILE_H

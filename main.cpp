@@ -7,26 +7,18 @@
 
 int main()
 {
-    Write_before_body();
-    Write_body();
+    Write_html_mode(Dump_html_BEGIN);
 
-    Node* root = Decoding_tree();
-    if (root == NULL)
-    {
-        root = (Node*)calloc(1, sizeof(Node));
-        char* first_question = (char*)calloc(1, 30);
-        strcpy(first_question, "1.5шка");
-        root->elem = first_question;
-    }
-    Insert(root);
+    Node* root = NULL;
+    root = Made_root(root);
 
-    Dump(root);
-    Write_body();
-    Write_html();
+    Game_mode_selection(root);
 
-    Make_definition_elem(root, "уретра");
+    Dump(root); 
+    Write_html_mode(Dump_html_END);
 
     Saving_tree(root);
     Tree_dtor(root);
+
     return 0;
 }
