@@ -8,6 +8,7 @@
 
 #include "tree.h"
 #include "dump_file.h"
+#include "stack.h"
 
 void Insert(Node* node)
 {
@@ -56,7 +57,6 @@ void Insert_new_property(Node* node)
     node->elem = Getting_info_from_user(node);
 
     Up_to_root(&node);
-    //Dump(node);
     Insert(node);
 }
 
@@ -223,10 +223,7 @@ void Parsing_line(char** buffer, char* line_buffer)
     char* start = *buffer;
     char* end = *buffer;
 
-    while(*end != '{' && *end != '}' && *end != '\0')
-    {
-        end++;
-    }
+    while((*end != '{') && (*end != '}') && (*end != '\0')) { end++; }
 
     size_t size_line = end - start;
     strncpy(line_buffer, start, size_line);
@@ -234,7 +231,50 @@ void Parsing_line(char** buffer, char* line_buffer)
 
     *buffer = end;
 }
+//---------------------------------------------finding definitions------------------------------------------------------
 
+void Make_definition_elem(Node* node, char* elem)
+{
+    Stack_t Path_to_elem = {};
+    StackConstrtor(&Path_to_elem, MAX_TREE_DEPTH);
+
+    Recursive_search_path_to_elem(node, elem, &Path_to_elem);
+
+    fprintf(stderr, "\n\n\n\n");
+    for (long long i = (long long)Path_to_elem.vacant_place - 1; i >= 0; i--)
+    {
+        fprintf(stderr, "   [%lld] = ", i);
+        fprintf(stderr, "%p\n", Path_to_elem.array_data[i]);
+    }
+
+    StackDtor(&Path_to_elem);
+}
+
+IS_FOUND Recursive_search_path_to_elem(Node* node, char* elem, Stack_t* Path_to_elem)
+{
+    StackPush(Path_to_elem, (StackElem_t)node);
+    fprintf(stderr, "push = %p\n", node);
+
+
+    if ((!node->left) && (!node->right))
+    {
+        if   (strcmp(elem, node->elem) == 0)                       { fprintf(stderr, "YEAH!!\n"); return FOUND; }
+        else {StackElem_t trash = 0; StackPop(Path_to_elem, &trash); fprintf(stderr, "pop = %p\n", trash); return NOT_FOUND; } 
+    }
+
+    IS_FOUND is_found_left  = Recursive_search_path_to_elem(node->left, elem, Path_to_elem);
+    IS_FOUND is_found_right = Recursive_search_path_to_elem(node->right, elem, Path_to_elem);
+
+    if ((is_found_left == FOUND) || (is_found_right == FOUND))
+    {
+        return FOUND;
+    }
+
+    StackElem_t trash = 0; StackPop(Path_to_elem, &trash);
+    fprintf(stderr, "pop* = %p\n", trash);
+
+    return NOT_FOUND;
+}
 
 
 
