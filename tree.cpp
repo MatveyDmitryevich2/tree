@@ -34,7 +34,6 @@ static Node* New_node(char* argument, Node* parent);
 static void Skip_parenthesis(char** buffer);
 static void Selecting_an_element(char** elem_v);
 static Game_modes User_interaction();
-static void Make_definition_elem(Node* node, char* elem, Stack_t* Path_to_elem);
 static Is_found Recursive_search_path_to_elem(Node* node, char* elem, Stack_t* Path_to_elem, bool Left_or_right);
 static void Definition_output(size_t array_size, Info_about_unit_of_path* array_properties);
 static bool Is_node_object(Node* node);
@@ -73,7 +72,7 @@ void Game_mode_selection(Node* node)
             char* elem = NULL;
             Selecting_an_element(&elem);
 
-            Make_definition_elem(node, elem, &Path_to_elem);
+            Recursive_search_path_to_elem(node, elem, &Path_to_elem, PARENT);
             Definition_output(Path_to_elem.vacant_place - 1, Path_to_elem.array_data);
 
             free(elem);
@@ -334,7 +333,6 @@ static void Parsing_line(char** buffer, char* line_buffer)
 
     *buffer = end;
 }
-//---------------------------------------------finding definitions------------------------------------------------------
 
 static Game_modes User_interaction()
 {
@@ -357,11 +355,6 @@ static void Selecting_an_element(char** elem)
 
     if((*elem)[size_line - 1] == '\n') { (*elem)[size_line - 1] = '\0'; }
 
-}
-
-static void Make_definition_elem(Node* node, char* elem, Stack_t* Path_to_elem)
-{
-    Recursive_search_path_to_elem(node, elem, Path_to_elem, PARENT);
 }
 
 static Is_found Recursive_search_path_to_elem(Node* node, char* elem, Stack_t* Path_to_elem, bool Left_or_right)
