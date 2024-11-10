@@ -359,7 +359,7 @@ static void Selecting_an_element(char** elem)
 
 }
 
-static void `Make_definition_elem(Node* node, char* elem, Stack_t* Path_to_elem)
+static void Make_definition_elem(Node* node, char* elem, Stack_t* Path_to_elem)
 {
     Recursive_search_path_to_elem(node, elem, Path_to_elem, PARENT);
 }
