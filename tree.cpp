@@ -18,6 +18,14 @@ enum User_response
     User_response_ERROR = 3,
 };
 
+enum Array_sizes
+{
+    Array_sizes_EQUAL         = 0,
+    Array_sizes_FIRST_BIGGER  = 1,
+    Array_sizes_SECOND_BIGGER = 2,
+
+};
+
 static void Mode_insert(Node* node);
 static void Up_to_root(Node** node);
 static void Insert_new_property(Node* node);
@@ -38,6 +46,12 @@ static Is_found Recursive_search_path_to_elem(Node* node, char* elem, Stack_t* P
 static void Definition_output(size_t array_size, Info_about_unit_of_path* array_properties);
 static bool Is_node_object(Node* node);
 static User_response Analyzing_user_response(char response[SIZE_ANSWER]);
+static void Search_similarities_between_elems(size_t array_size1, Info_about_unit_of_path* array_properties1,
+                                              size_t array_size2, Info_about_unit_of_path* array_properties2);
+static void Conclusion_similarities_case_equal(size_t array_size, Info_about_unit_of_path* array_properties1,
+                                               Info_about_unit_of_path* array_properties2);
+static Array_sizes Compar_array_sizes(size_t array_size1, size_t array_size2);
+static void Clean_buffer();
 
 //-------------------------------------------------global---------------------------------------------------------------
 
@@ -63,7 +77,9 @@ void Game_mode_selection(Node* node)
         case Game_modes_ELEM_SEARCH: 
         {
             Mode_insert(node);
-        }  break;
+        }  
+        break;
+
         case Game_modes_MAKE_DEFENITION_ELEM: 
         {
             Stack_t Path_to_elem = {};
@@ -77,17 +93,156 @@ void Game_mode_selection(Node* node)
 
             free(elem);
             StackDtor(&Path_to_elem);
-        }  break;
+        }  
+        break;
+
         case Game_modes_FIND_COMMONALITIES_BETWEEN_ELEM: 
         {
-            //FIXME сделать функцию
-        }  break;
-        case Game_modes_EXIT:
-        {} break;
+            Stack_t Path_to_elem1 = {};
+            Stack_t Path_to_elem2 = {};
+            StackConstrtor(&Path_to_elem1, MAX_TREE_DEPTH);
+            StackConstrtor(&Path_to_elem2, MAX_TREE_DEPTH);
+
+            char* elem1 = NULL;
+            char* elem2 = NULL;
+            Selecting_an_element(&elem1);
+            Selecting_an_element(&elem2);
+
+            Recursive_search_path_to_elem(node, elem1, &Path_to_elem1, PARENT);
+            Recursive_search_path_to_elem(node, elem2, &Path_to_elem2, PARENT);
+            
+            Search_similarities_between_elems(Path_to_elem1.vacant_place - 1, Path_to_elem1.array_data,
+                                              Path_to_elem2.vacant_place - 1, Path_to_elem2.array_data);
+
+            free(elem1);
+            free(elem2);
+            StackDtor(&Path_to_elem1);
+            StackDtor(&Path_to_elem2);
+        }  
+        break;
+
+        case Game_modes_EXIT: 
+        break;
+
         default:
-        { assert(0); } 
-           break;
+        {
+            assert(0);
+        }
     }
+}
+
+static void Search_similarities_between_elems(size_t array_size1, Info_about_unit_of_path* array_properties1,
+                                              size_t array_size2, Info_about_unit_of_path* array_properties2)
+{
+    fprintf(stderr, "\n%s ", ((Node*)array_properties1[array_size1].Adress)->elem);
+    fprintf(stderr, "похож на ");
+    fprintf(stderr, "%s", ((Node*)array_properties2[array_size2].Adress)->elem);
+    fprintf(stderr, ", тем что они оба ");
+
+    switch(Compar_array_sizes(array_size1, array_size2))
+    {
+        case Array_sizes_FIRST_BIGGER: 
+        {
+
+        }  
+        break;
+
+        case Array_sizes_SECOND_BIGGER: 
+        {
+
+        }  
+        break;
+
+        case Array_sizes_EQUAL: 
+        {
+            Conclusion_similarities_case_equal(array_size1, array_properties1, array_properties2);
+        }  
+        break;
+    }
+}
+
+static void Conclusion_similarities_case_equal(size_t array_size, Info_about_unit_of_path* array_properties1,
+                                               Info_about_unit_of_path* array_properties2)
+{
+    size_t current_index = 1;
+    
+    for ( ; current_index <= array_size; current_index++)
+    {
+        if ((array_properties1[current_index - 1].Adress == array_properties2[current_index - 1].Adress)
+            && (array_properties1[current_index].True_or_False == array_properties2[current_index].True_or_False))
+        {
+            if (array_properties1[current_index].True_or_False == LEFT_YES)
+            {
+                fprintf(stderr, " ");
+            }
+            else
+            {
+                fprintf(stderr, " не ");
+            }
+            fprintf(stderr, "%s", ((Node*)array_properties1[current_index - 1].Adress)->elem);
+        }
+        else { break; }
+    }
+
+    fprintf(stderr, ", но ");
+    fprintf(stderr, "%s", ((Node*)array_properties1[array_size].Adress)->elem);
+
+    size_t current_index1 = current_index;
+    for ( ; current_index1 <= array_size; current_index1++)
+    {
+        if (array_properties1[current_index1].True_or_False == LEFT_YES)
+        {
+            fprintf(stderr, " ");
+        }
+        else
+        {
+            fprintf(stderr, " не ");
+        }
+        fprintf(stderr, "%s", ((Node*)array_properties1[current_index1 - 1].Adress)->elem);
+    }
+
+    fprintf(stderr, ", а ");
+    fprintf(stderr, "%s", ((Node*)array_properties2[array_size].Adress)->elem);
+    size_t current_index2 = current_index;
+    for ( ; current_index2 <= array_size; current_index2++)
+    {
+        if (array_properties2[current_index2].True_or_False == LEFT_YES)
+        {
+            fprintf(stderr, " ");
+        }
+        else
+        {
+            fprintf(stderr, " не ");
+        }
+        fprintf(stderr, "%s", ((Node*)array_properties2[current_index2 - 1].Adress)->elem);
+    }
+
+    fprintf(stderr, "\n");
+}
+
+static Array_sizes Compar_array_sizes(size_t array_size1, size_t array_size2)
+{
+    if (array_size1 > array_size2)      { return Array_sizes_FIRST_BIGGER;  }
+    else if (array_size1 < array_size2) { return Array_sizes_SECOND_BIGGER; }
+    else                                { return Array_sizes_EQUAL;         }
+}
+
+static void Definition_output(size_t array_size, Info_about_unit_of_path* array_properties)
+{
+    fprintf(stderr, "\n%s:", ((Node*)array_properties[array_size].Adress)->elem);
+    for (size_t i = 1; i <= array_size; i++)
+    {
+        if (array_properties[i].True_or_False == LEFT_YES)
+        {
+            fprintf(stderr, " ");
+        }
+        else
+        {
+            fprintf(stderr, " не ");
+        }
+        fprintf(stderr, "%s", ((Node*)array_properties[i - 1].Adress)->elem);
+    }
+    fprintf(stderr, "\n");
 }
 
 void Saving_tree(Node* node)
@@ -112,6 +267,12 @@ void Tree_dtor(Node* node)
 
 //-----------------------------------------------------static-----------------------------------------------------------
 
+static void Clean_buffer()
+{
+    int clean_buffer = 0;
+    while ((clean_buffer = getchar()) != '\n' && clean_buffer != EOF) { }
+}
+
 static void Mode_insert(Node* node)
 {
     assert(node != NULL);
@@ -123,6 +284,7 @@ static void Mode_insert(Node* node)
     char answer[SIZE_ANSWER] = "";
     assert(SIZE_ANSWER == 13 /*поменять scanf %12s если упало*/);
     scanf("%12s", answer);
+    Clean_buffer();
 
     switch (Analyzing_user_response(answer))
     {
@@ -211,8 +373,6 @@ static Node* Insert_right_child(Node* parent_node)
     Node* node = Create_node(parent_node);
 
     fprintf(stderr, "Напишите, пожалуйста, объект(с маленькой буквы) который Вы загадли\n");
-    int clean_buffer = 0;
-    while ((clean_buffer = getchar()) != '\n' && clean_buffer != EOF) { }
 
     node->elem = Getting_info_from_user(node);
 
@@ -341,20 +501,19 @@ static Game_modes User_interaction()
 
     Game_modes game_mode = (Game_modes)0;
     scanf("%d", &game_mode);
+    Clean_buffer();
 
     return game_mode;
 }
 
 static void Selecting_an_element(char** elem)
 {
-    fprintf(stderr, "Введите желаем для работы элемент\n");
-    int clean_buffer = 0;
-    while ((clean_buffer = getchar()) != '\n' && clean_buffer != EOF) { }
+    fprintf(stderr, "Введите желаемый для работы элемент\n");
     size_t size_new_condition = 0;
     long int size_line = getline(elem, &size_new_condition, stdin);
+    assert(size_line >= 0);
 
     if((*elem)[size_line - 1] == '\n') { (*elem)[size_line - 1] = '\0'; }
-
 }
 
 static Is_found Recursive_search_path_to_elem(Node* node, char* elem, Stack_t* Path_to_elem, bool Left_or_right)
@@ -378,23 +537,6 @@ static Is_found Recursive_search_path_to_elem(Node* node, char* elem, Stack_t* P
     return NOT_FOUND;
 }
 
-static void Definition_output(size_t array_size, Info_about_unit_of_path* array_properties)
-{
-    fprintf(stderr, "\n%s:", ((Node*)array_properties[array_size].Adress)->elem);
-    for(size_t i = 1; i <= array_size; i++)
-    {
-        if (array_properties[i].True_or_False == LEFT_YES)
-        {
-            fprintf(stderr, " ");
-        }
-        else
-        {
-            fprintf(stderr, " не ");
-        }
-        fprintf(stderr, "%s", ((Node*)array_properties[i - 1].Adress)->elem);
-    }
-    fprintf(stderr, "\n");
-}
 
 
     // for (long long i = 0; i <= (long long)Path_to_elem.vacant_place - 1; i++)
