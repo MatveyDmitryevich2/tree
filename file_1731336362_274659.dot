@@ -1,0 +1,306 @@
+digraph structs {
+ charset = "UTF-8";
+ rankdir=TB;
+ bgcolor = "#BFBA30";
+fontcolor = black;
+ fontsize = 18;
+ style = "rounded";
+ margin = 0.3;
+ splines = ortho;
+ranksep = 1.0;
+ nodesep = 0.9;
+ edge [color="#A600A6", style=solid, penwidth=2];
+node_0 [
+shape=plaintext,
+label=<
+<table border="0" cellpadding="4" cellborder="1" width="300">
+<tr><td align="center" colspan="2">Parent: (nil)</td></tr>
+<tr><td align="center" colspan="2">животное</td></tr>
+<tr>
+<td align="center" width="150">Left: 0x6030000000a0</td>
+<td align="center" width="150">Right: 0x603000000250</td>
+</tr>
+</table>
+>
+];
+    node_0 -> node_1 [color="#A600A6", label="да"];
+node_1 [
+shape=plaintext,
+label=<
+<table border="0" cellpadding="4" cellborder="1" width="300">
+<tr><td align="center" colspan="2">Parent: 0x603000000040</td></tr>
+<tr><td align="center" colspan="2">домашнее животное</td></tr>
+<tr>
+<td align="center" width="150">Left: 0x6030000000d0</td>
+<td align="center" width="150">Right: 0x603000000160</td>
+</tr>
+</table>
+>
+];
+    node_1 -> node_2 [color="#A600A6", label="да"];
+node_2 [
+shape=plaintext,
+label=<
+<table border="0" cellpadding="4" cellborder="1" width="300">
+<tr><td align="center" colspan="2">Parent: 0x6030000000a0</td></tr>
+<tr><td align="center" colspan="2">любим</td></tr>
+<tr>
+<td align="center" width="150">Left: 0x603000000100</td>
+<td align="center" width="150">Right: 0x603000000130</td>
+</tr>
+</table>
+>
+];
+    node_2 -> node_3 [color="#A600A6", label="да"];
+node_3 [
+shape=plaintext,
+label=<
+<table border="0" cellpadding="4" cellborder="1" width="300">
+<tr><td align="center" colspan="2">Parent: 0x6030000000d0</td></tr>
+<tr><td align="center" colspan="2">1.5шка</td></tr>
+<tr>
+<td align="center" width="150">Left: (nil)</td>
+<td align="center" width="150">Right: (nil)</td>
+</tr>
+</table>
+>
+];
+    node_2 -> node_4 [color="#A600A6", label="нет"];
+node_4 [
+shape=plaintext,
+label=<
+<table border="0" cellpadding="4" cellborder="1" width="300">
+<tr><td align="center" colspan="2">Parent: 0x6030000000d0</td></tr>
+<tr><td align="center" colspan="2">крыса</td></tr>
+<tr>
+<td align="center" width="150">Left: (nil)</td>
+<td align="center" width="150">Right: (nil)</td>
+</tr>
+</table>
+>
+];
+    node_1 -> node_5 [color="#A600A6", label="нет"];
+node_5 [
+shape=plaintext,
+label=<
+<table border="0" cellpadding="4" cellborder="1" width="300">
+<tr><td align="center" colspan="2">Parent: 0x6030000000a0</td></tr>
+<tr><td align="center" colspan="2">в Африке</td></tr>
+<tr>
+<td align="center" width="150">Left: 0x603000000190</td>
+<td align="center" width="150">Right: 0x6030000001c0</td>
+</tr>
+</table>
+>
+];
+    node_5 -> node_6 [color="#A600A6", label="да"];
+node_6 [
+shape=plaintext,
+label=<
+<table border="0" cellpadding="4" cellborder="1" width="300">
+<tr><td align="center" colspan="2">Parent: 0x603000000160</td></tr>
+<tr><td align="center" colspan="2">слон</td></tr>
+<tr>
+<td align="center" width="150">Left: (nil)</td>
+<td align="center" width="150">Right: (nil)</td>
+</tr>
+</table>
+>
+];
+    node_5 -> node_7 [color="#A600A6", label="нет"];
+node_7 [
+shape=plaintext,
+label=<
+<table border="0" cellpadding="4" cellborder="1" width="300">
+<tr><td align="center" colspan="2">Parent: 0x603000000160</td></tr>
+<tr><td align="center" colspan="2">летает</td></tr>
+<tr>
+<td align="center" width="150">Left: 0x6030000001f0</td>
+<td align="center" width="150">Right: 0x603000000220</td>
+</tr>
+</table>
+>
+];
+    node_7 -> node_8 [color="#A600A6", label="да"];
+node_8 [
+shape=plaintext,
+label=<
+<table border="0" cellpadding="4" cellborder="1" width="300">
+<tr><td align="center" colspan="2">Parent: 0x6030000001c0</td></tr>
+<tr><td align="center" colspan="2">воробей</td></tr>
+<tr>
+<td align="center" width="150">Left: (nil)</td>
+<td align="center" width="150">Right: (nil)</td>
+</tr>
+</table>
+>
+];
+    node_7 -> node_9 [color="#A600A6", label="нет"];
+node_9 [
+shape=plaintext,
+label=<
+<table border="0" cellpadding="4" cellborder="1" width="300">
+<tr><td align="center" colspan="2">Parent: 0x6030000001c0</td></tr>
+<tr><td align="center" colspan="2">волк</td></tr>
+<tr>
+<td align="center" width="150">Left: (nil)</td>
+<td align="center" width="150">Right: (nil)</td>
+</tr>
+</table>
+>
+];
+    node_0 -> node_10 [color="#A600A6", label="нет"];
+node_10 [
+shape=plaintext,
+label=<
+<table border="0" cellpadding="4" cellborder="1" width="300">
+<tr><td align="center" colspan="2">Parent: 0x603000000040</td></tr>
+<tr><td align="center" colspan="2">мальчик</td></tr>
+<tr>
+<td align="center" width="150">Left: 0x603000000280</td>
+<td align="center" width="150">Right: 0x603000000340</td>
+</tr>
+</table>
+>
+];
+    node_10 -> node_11 [color="#A600A6", label="да"];
+node_11 [
+shape=plaintext,
+label=<
+<table border="0" cellpadding="4" cellborder="1" width="300">
+<tr><td align="center" colspan="2">Parent: 0x603000000250</td></tr>
+<tr><td align="center" colspan="2">гениален</td></tr>
+<tr>
+<td align="center" width="150">Left: 0x6030000002e0</td>
+<td align="center" width="150">Right: 0x603000000310</td>
+</tr>
+</table>
+>
+];
+    node_11 -> node_12 [color="#A600A6", label="да"];
+node_12 [
+shape=plaintext,
+label=<
+<table border="0" cellpadding="4" cellborder="1" width="300">
+<tr><td align="center" colspan="2">Parent: 0x603000000280</td></tr>
+<tr><td align="center" colspan="2">Вова</td></tr>
+<tr>
+<td align="center" width="150">Left: (nil)</td>
+<td align="center" width="150">Right: (nil)</td>
+</tr>
+</table>
+>
+];
+    node_11 -> node_13 [color="#A600A6", label="нет"];
+node_13 [
+shape=plaintext,
+label=<
+<table border="0" cellpadding="4" cellborder="1" width="300">
+<tr><td align="center" colspan="2">Parent: 0x603000000280</td></tr>
+<tr><td align="center" colspan="2">Егор</td></tr>
+<tr>
+<td align="center" width="150">Left: (nil)</td>
+<td align="center" width="150">Right: (nil)</td>
+</tr>
+</table>
+>
+];
+    node_10 -> node_14 [color="#A600A6", label="нет"];
+node_14 [
+shape=plaintext,
+label=<
+<table border="0" cellpadding="4" cellborder="1" width="300">
+<tr><td align="center" colspan="2">Parent: 0x603000000250</td></tr>
+<tr><td align="center" colspan="2">жена</td></tr>
+<tr>
+<td align="center" width="150">Left: 0x603000000370</td>
+<td align="center" width="150">Right: 0x6030000003a0</td>
+</tr>
+</table>
+>
+];
+    node_14 -> node_15 [color="#A600A6", label="да"];
+node_15 [
+shape=plaintext,
+label=<
+<table border="0" cellpadding="4" cellborder="1" width="300">
+<tr><td align="center" colspan="2">Parent: 0x603000000340</td></tr>
+<tr><td align="center" colspan="2">Вика</td></tr>
+<tr>
+<td align="center" width="150">Left: (nil)</td>
+<td align="center" width="150">Right: (nil)</td>
+</tr>
+</table>
+>
+];
+    node_14 -> node_16 [color="#A600A6", label="нет"];
+node_16 [
+shape=plaintext,
+label=<
+<table border="0" cellpadding="4" cellborder="1" width="300">
+<tr><td align="center" colspan="2">Parent: 0x603000000340</td></tr>
+<tr><td align="center" colspan="2">любимая</td></tr>
+<tr>
+<td align="center" width="150">Left: 0x6030000003d0</td>
+<td align="center" width="150">Right: 0x603000000460</td>
+</tr>
+</table>
+>
+];
+    node_16 -> node_17 [color="#A600A6", label="да"];
+node_17 [
+shape=plaintext,
+label=<
+<table border="0" cellpadding="4" cellborder="1" width="300">
+<tr><td align="center" colspan="2">Parent: 0x6030000003a0</td></tr>
+<tr><td align="center" colspan="2">подруга</td></tr>
+<tr>
+<td align="center" width="150">Left: 0x603000000400</td>
+<td align="center" width="150">Right: 0x603000000430</td>
+</tr>
+</table>
+>
+];
+    node_17 -> node_18 [color="#A600A6", label="да"];
+node_18 [
+shape=plaintext,
+label=<
+<table border="0" cellpadding="4" cellborder="1" width="300">
+<tr><td align="center" colspan="2">Parent: 0x6030000003d0</td></tr>
+<tr><td align="center" colspan="2">Полина</td></tr>
+<tr>
+<td align="center" width="150">Left: (nil)</td>
+<td align="center" width="150">Right: (nil)</td>
+</tr>
+</table>
+>
+];
+    node_17 -> node_19 [color="#A600A6", label="нет"];
+node_19 [
+shape=plaintext,
+label=<
+<table border="0" cellpadding="4" cellborder="1" width="300">
+<tr><td align="center" colspan="2">Parent: 0x6030000003d0</td></tr>
+<tr><td align="center" colspan="2">мама</td></tr>
+<tr>
+<td align="center" width="150">Left: (nil)</td>
+<td align="center" width="150">Right: (nil)</td>
+</tr>
+</table>
+>
+];
+    node_16 -> node_20 [color="#A600A6", label="нет"];
+node_20 [
+shape=plaintext,
+label=<
+<table border="0" cellpadding="4" cellborder="1" width="300">
+<tr><td align="center" colspan="2">Parent: 0x6030000003a0</td></tr>
+<tr><td align="center" colspan="2">Англичанка</td></tr>
+<tr>
+<td align="center" width="150">Left: (nil)</td>
+<td align="center" width="150">Right: (nil)</td>
+</tr>
+</table>
+>
+];
+}

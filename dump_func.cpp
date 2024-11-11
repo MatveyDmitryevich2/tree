@@ -18,8 +18,8 @@ static void Generate_nodes(Node* node, FILE* file);
 
 void Write_html_mode(Dump_html mode)
 {
-    if ( mode = Dump_html_BEGIN) { Write_before_body(); Write_body(); }
-    if ( mode = Dump_html_END)   { Write_body(); Write_html();        }
+    if ( mode == Dump_html_BEGIN) { Write_before_body(); Write_body(); }
+    if ( mode == Dump_html_END)   { Write_body(); Write_html();        }
 }
 
 void Dump(Node* root) 

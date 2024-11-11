@@ -15,7 +15,6 @@ enum User_response
     User_response_YES   = 1,
     User_response_NO    = 0,
     User_response_EXIT  = 2,
-    User_response_ERROR = 3,
 };
 
 enum Array_sizes
@@ -42,7 +41,8 @@ static Node* New_node(char* argument, Node* parent);
 static void Skip_parenthesis(char** buffer);
 static void Selecting_an_element(char** elem_v);
 static Game_modes User_interaction();
-static Is_found Recursive_search_path_to_elem(Node* node, char* elem, Stack_t* Path_to_elem, bool Left_or_right);
+static Is_found Recursive_search_path_to_elem(Node* node, char* elem, Stack_t* Path_to_elem,
+                                              To_build_definitions_elem Left_or_right);
 static void Definition_output(size_t array_size, Info_about_unit_of_path* array_properties);
 static bool Is_node_object(Node* node);
 static User_response Analyzing_user_response(char response[SIZE_ANSWER]);
@@ -51,6 +51,8 @@ static void Search_similarities_between_elems(size_t array_size1, Info_about_uni
 static void Conclusion_similarities_case_equal(size_t array_size, Info_about_unit_of_path* array_properties1,
                                                Info_about_unit_of_path* array_properties2);
 static Array_sizes Compar_array_sizes(size_t array_size1, size_t array_size2);
+static void Conclusion_similarities_case_bigger(size_t array_size1, Info_about_unit_of_path* array_properties1,
+                                              size_t array_size2, Info_about_unit_of_path* array_properties2);
 static void Clean_buffer();
 
 //-------------------------------------------------global---------------------------------------------------------------
@@ -131,120 +133,6 @@ void Game_mode_selection(Node* node)
     }
 }
 
-static void Search_similarities_between_elems(size_t array_size1, Info_about_unit_of_path* array_properties1,
-                                              size_t array_size2, Info_about_unit_of_path* array_properties2)
-{
-    fprintf(stderr, "\n%s ", ((Node*)array_properties1[array_size1].Adress)->elem);
-    fprintf(stderr, "похож на ");
-    fprintf(stderr, "%s", ((Node*)array_properties2[array_size2].Adress)->elem);
-    fprintf(stderr, ", тем что они оба ");
-
-    switch(Compar_array_sizes(array_size1, array_size2))
-    {
-        case Array_sizes_FIRST_BIGGER: 
-        {
-
-        }  
-        break;
-
-        case Array_sizes_SECOND_BIGGER: 
-        {
-
-        }  
-        break;
-
-        case Array_sizes_EQUAL: 
-        {
-            Conclusion_similarities_case_equal(array_size1, array_properties1, array_properties2);
-        }  
-        break;
-    }
-}
-
-static void Conclusion_similarities_case_equal(size_t array_size, Info_about_unit_of_path* array_properties1,
-                                               Info_about_unit_of_path* array_properties2)
-{
-    size_t current_index = 1;
-    
-    for ( ; current_index <= array_size; current_index++)
-    {
-        if ((array_properties1[current_index - 1].Adress == array_properties2[current_index - 1].Adress)
-            && (array_properties1[current_index].True_or_False == array_properties2[current_index].True_or_False))
-        {
-            if (array_properties1[current_index].True_or_False == LEFT_YES)
-            {
-                fprintf(stderr, " ");
-            }
-            else
-            {
-                fprintf(stderr, " не ");
-            }
-            fprintf(stderr, "%s", ((Node*)array_properties1[current_index - 1].Adress)->elem);
-        }
-        else { break; }
-    }
-
-    fprintf(stderr, ", но ");
-    fprintf(stderr, "%s", ((Node*)array_properties1[array_size].Adress)->elem);
-
-    size_t current_index1 = current_index;
-    for ( ; current_index1 <= array_size; current_index1++)
-    {
-        if (array_properties1[current_index1].True_or_False == LEFT_YES)
-        {
-            fprintf(stderr, " ");
-        }
-        else
-        {
-            fprintf(stderr, " не ");
-        }
-        fprintf(stderr, "%s", ((Node*)array_properties1[current_index1 - 1].Adress)->elem);
-    }
-
-    fprintf(stderr, ", а ");
-    fprintf(stderr, "%s", ((Node*)array_properties2[array_size].Adress)->elem);
-    size_t current_index2 = current_index;
-    for ( ; current_index2 <= array_size; current_index2++)
-    {
-        if (array_properties2[current_index2].True_or_False == LEFT_YES)
-        {
-            fprintf(stderr, " ");
-        }
-        else
-        {
-            fprintf(stderr, " не ");
-        }
-        fprintf(stderr, "%s", ((Node*)array_properties2[current_index2 - 1].Adress)->elem);
-    }
-
-    fprintf(stderr, "\n");
-}
-
-static Array_sizes Compar_array_sizes(size_t array_size1, size_t array_size2)
-{
-    if (array_size1 > array_size2)      { return Array_sizes_FIRST_BIGGER;  }
-    else if (array_size1 < array_size2) { return Array_sizes_SECOND_BIGGER; }
-    else                                { return Array_sizes_EQUAL;         }
-}
-
-static void Definition_output(size_t array_size, Info_about_unit_of_path* array_properties)
-{
-    fprintf(stderr, "\n%s:", ((Node*)array_properties[array_size].Adress)->elem);
-    for (size_t i = 1; i <= array_size; i++)
-    {
-        if (array_properties[i].True_or_False == LEFT_YES)
-        {
-            fprintf(stderr, " ");
-        }
-        else
-        {
-            fprintf(stderr, " не ");
-        }
-        fprintf(stderr, "%s", ((Node*)array_properties[i - 1].Adress)->elem);
-    }
-    fprintf(stderr, "\n");
-}
-
 void Saving_tree(Node* node)
 {
     assert(node != NULL);
@@ -300,7 +188,7 @@ static void Mode_insert(Node* node)
         } break;
         case User_response_NO:
         {
-            if (Is_node_object(node)) { Insert_new_property(node); Mode_insert(node);}
+            if (Is_node_object(node)) { Insert_new_property(node); Up_to_root(&node); Mode_insert(node); }
             else                      { Mode_insert(node->right); }
         } break;
         case User_response_EXIT:
@@ -320,8 +208,7 @@ static User_response Analyzing_user_response(char response[SIZE_ANSWER])
 
     if (strcmp(response, YES) == 0)       { return User_response_YES;   }
     else if (strcmp(response, NO) == 0)   { return User_response_NO;    }
-    else if (strcmp(response, EXIT) == 0) { return User_response_EXIT;  }
-    else                                  { return User_response_ERROR; }
+    else                                  { return User_response_EXIT;  }
 }
 
 static bool Is_node_object(Node* node)
@@ -487,7 +374,7 @@ static void Parsing_line(char** buffer, char* line_buffer)
 
     while((*end != '{') && (*end != '}') && (*end != '\0')) { end++; }
 
-    size_t size_line = end - start;
+    size_t size_line = (size_t)(end - start);
     strncpy(line_buffer, start, size_line);
     line_buffer[size_line] = '\0';
 
@@ -499,8 +386,8 @@ static Game_modes User_interaction()
     fprintf(stderr, "Выберите режим игры:\n1)Найти или добавить элемент\n2)Создать определение\n"
                     "3)Поиск общего между двумя элементамиn\n4)Выход\n\nНапишите цифру от 1 до 4\n");
 
-    Game_modes game_mode = (Game_modes)0;
-    scanf("%d", &game_mode);
+    Game_modes game_mode = Game_modes_ELEM_SEARCH;
+    scanf("%d", (int*)&game_mode);
     Clean_buffer();
 
     return game_mode;
@@ -516,7 +403,8 @@ static void Selecting_an_element(char** elem)
     if((*elem)[size_line - 1] == '\n') { (*elem)[size_line - 1] = '\0'; }
 }
 
-static Is_found Recursive_search_path_to_elem(Node* node, char* elem, Stack_t* Path_to_elem, bool Left_or_right)
+static Is_found Recursive_search_path_to_elem(Node* node, char* elem, Stack_t* Path_to_elem,
+                                              To_build_definitions_elem Left_or_right)
 {
     Info_about_unit_of_path node_info = {(char*)node, Left_or_right};
     StackPush(Path_to_elem, (StackElem_t)node_info);
@@ -537,16 +425,182 @@ static Is_found Recursive_search_path_to_elem(Node* node, char* elem, Stack_t* P
     return NOT_FOUND;
 }
 
+static void Search_similarities_between_elems(size_t array_size1, Info_about_unit_of_path* array_properties1,
+                                              size_t array_size2, Info_about_unit_of_path* array_properties2)
+{
+    fprintf(stderr, "\n%s ", ((Node*)array_properties1[array_size1].Adress)->elem);
+    fprintf(stderr, "похож на ");
+    fprintf(stderr, "%s", ((Node*)array_properties2[array_size2].Adress)->elem);
+    fprintf(stderr, ", тем что они оба");
 
+    switch(Compar_array_sizes(array_size1, array_size2))
+    {
+        case Array_sizes_FIRST_BIGGER: 
+        {
+            Conclusion_similarities_case_bigger(array_size1, array_properties1, array_size2, array_properties2);
+        }  
+        break;
 
-    // for (long long i = 0; i <= (long long)Path_to_elem.vacant_place - 1; i++)
-    // {
-    //     fprintf(stderr, "   [%lld] = ", i);
-    //     fprintf(stderr, "%p", Path_to_elem.array_data[i].Adress);
-    //     if (Path_to_elem.array_data[i].True_or_False == LEFT_YES) { fprintf(stderr, "    YES\n"); }
-    //     else { fprintf(stderr, "    NO\n"); }
-    // }
+        case Array_sizes_SECOND_BIGGER: 
+        {
+            Conclusion_similarities_case_bigger(array_size2, array_properties2, array_size1, array_properties1);
+        }  
+        break;
 
+        case Array_sizes_EQUAL: 
+        {
+            Conclusion_similarities_case_equal(array_size1, array_properties1, array_properties2);
+        }  
+        break;
+        default:
+        {
+            assert(0);
+        } break;
+    }
+}
+
+static void Conclusion_similarities_case_bigger(size_t array_size1, Info_about_unit_of_path* array_properties1,
+                                              size_t array_size2, Info_about_unit_of_path* array_properties2)
+{
+    size_t current_index = 1;
+    
+    for ( ; current_index <= array_size2; current_index++)
+    {
+        if ((array_properties1[current_index - 1].Adress == array_properties2[current_index - 1].Adress)
+            && (array_properties1[current_index].True_or_False == array_properties2[current_index].True_or_False))
+        {
+            if (array_properties1[current_index].True_or_False == LEFT_YES)
+            {
+                fprintf(stderr, " ");
+            }
+            else
+            {
+                fprintf(stderr, " не ");
+            }
+            fprintf(stderr, "%s", ((Node*)array_properties1[current_index - 1].Adress)->elem);
+        }
+        else { break; }
+    }
+
+    fprintf(stderr, ", но ");
+    fprintf(stderr, "%s", ((Node*)array_properties1[array_size1].Adress)->elem);
+
+    size_t current_index1 = current_index;
+    for ( ; current_index1 <= array_size1; current_index1++)
+    {
+        if (array_properties1[current_index1].True_or_False == LEFT_YES)
+        {
+            fprintf(stderr, " ");
+        }
+        else
+        {
+            fprintf(stderr, " не ");
+        }
+        fprintf(stderr, "%s", ((Node*)array_properties1[current_index1 - 1].Adress)->elem);
+    }
+
+    fprintf(stderr, ", а ");
+    fprintf(stderr, "%s", ((Node*)array_properties2[array_size2].Adress)->elem);
+    size_t current_index2 = current_index;
+    for ( ; current_index2 <= array_size2; current_index2++)
+    {
+        if (array_properties2[current_index2].True_or_False == LEFT_YES)
+        {
+            fprintf(stderr, " ");
+        }
+        else
+        {
+            fprintf(stderr, " не ");
+        }
+        fprintf(stderr, "%s", ((Node*)array_properties2[current_index2 - 1].Adress)->elem);
+    }
+
+    fprintf(stderr, "\n");
+}
+
+static void Conclusion_similarities_case_equal(size_t array_size, Info_about_unit_of_path* array_properties1,
+                                               Info_about_unit_of_path* array_properties2)
+{
+    size_t current_index = 1;
+    
+    for ( ; current_index <= array_size; current_index++)
+    {
+        if ((array_properties1[current_index - 1].Adress == array_properties2[current_index - 1].Adress)
+            && (array_properties1[current_index].True_or_False == array_properties2[current_index].True_or_False))
+        {
+            if (array_properties1[current_index].True_or_False == LEFT_YES)
+            {
+                fprintf(stderr, " ");
+            }
+            else
+            {
+                fprintf(stderr, " не ");
+            }
+            fprintf(stderr, "%s", ((Node*)array_properties1[current_index - 1].Adress)->elem);
+        }
+        else { break; }
+    }
+
+    fprintf(stderr, ", но ");
+    fprintf(stderr, "%s", ((Node*)array_properties1[array_size].Adress)->elem);
+
+    size_t current_index1 = current_index;
+    for ( ; current_index1 <= array_size; current_index1++)
+    {
+        if (array_properties1[current_index1].True_or_False == LEFT_YES)
+        {
+            fprintf(stderr, " ");
+        }
+        else
+        {
+            fprintf(stderr, " не ");
+        }
+        fprintf(stderr, "%s", ((Node*)array_properties1[current_index1 - 1].Adress)->elem);
+    }
+
+    fprintf(stderr, ", а ");
+    fprintf(stderr, "%s", ((Node*)array_properties2[array_size].Adress)->elem);
+    size_t current_index2 = current_index;
+    for ( ; current_index2 <= array_size; current_index2++)
+    {
+        if (array_properties2[current_index2].True_or_False == LEFT_YES)
+        {
+            fprintf(stderr, " ");
+        }
+        else
+        {
+            fprintf(stderr, " не ");
+        }
+        fprintf(stderr, "%s", ((Node*)array_properties2[current_index2 - 1].Adress)->elem);
+    }
+
+    fprintf(stderr, "\n");
+}
+
+static Array_sizes Compar_array_sizes(size_t array_size1, size_t array_size2)
+{
+    if (array_size1 > array_size2)      { return Array_sizes_FIRST_BIGGER;  }
+    else if (array_size1 < array_size2) { return Array_sizes_SECOND_BIGGER; }
+    else                                { return Array_sizes_EQUAL;         }
+}
+
+static void Definition_output(size_t array_size, Info_about_unit_of_path* array_properties)
+{
+    fprintf(stderr, "\n%s:", ((Node*)array_properties[array_size].Adress)->elem);
+    for (size_t i = 1; i <= array_size; i++)
+    {
+        if (array_properties[i].True_or_False == LEFT_YES)
+        {
+            fprintf(stderr, " ");
+        }
+        else
+        {
+            fprintf(stderr, " не ");
+        }
+        fprintf(stderr, "%s", ((Node*)array_properties[i - 1].Adress)->elem);
+    }
+    fprintf(stderr, "\n");
+}
 
 
 
